@@ -11,24 +11,19 @@ passport.use(
             clientSecret: process.env.GOOGLE_CLIENT_SECRET,
             callbackURL: `${process.env.BASE_URL}/auth/google/callback`,
             scope: ["profile", "email"],
+            passReqToCallback: true
         },
-        async (accessToken, refreshToken, profile, done) => {
+        async (req, accessToken, refreshToken, profile, done) => {
             try {
                 let user = await User.findOne({ email: profile.emails?.[0].value });
 
                 if (!user) {
-                    // Create new user if doesn't exist
-                    user = await User.create({
-                        email: profile.emails?.[0].value,
-                        name: profile.displayName,
-                        googleId: profile.id,
-                        isVerified: true,
+                    return done(null, false, {
+                        message: 'You need to register your account first!',
+                        redirectTo: '/signup'  // Optional: suggest where to register
                     });
                 }
-
-                // Generate token
-                const token = generateToken(user);
-
+                const token = generateToken(user._id);
                 return done(null, { user, token });
             } catch (error) {
                 return done(error);
