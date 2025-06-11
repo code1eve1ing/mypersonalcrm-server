@@ -10,6 +10,7 @@ const session = require('express-session');
 const passport = require('passport');
 const authRoutes = require('./routes/authRoutes');
 const userRoutes = require('./routes/userRoutes');
+const itemRoutes = require('./routes/itemRoutes');
 require('./config/passport')
 
 
@@ -40,6 +41,7 @@ app.use(passport.session());
 // Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
+app.use('/api/items', itemRoutes);
 
 // Error handling middleware
 app.use(errorHandler);
