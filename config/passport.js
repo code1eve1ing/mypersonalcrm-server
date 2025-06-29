@@ -1,8 +1,7 @@
-// config/passport.ts
 const { Strategy: GoogleStrategy } = require("passport-google-oauth20")
 const passport = require('passport');
-const User = require('../models/User')
-const generateToken = require('../utils/generateToken')
+const { User } = require("../models");
+const { generateToken } = require("../utils/jwt");
 
 passport.use(
     new GoogleStrategy(
@@ -15,18 +14,20 @@ passport.use(
         },
         async (req, accessToken, refreshToken, profile, done) => {
             try {
-                let user = await User.findOne({ email: profile.emails?.[0].value });
+                const email = profile.emails?.[0].value;
+                let user = await User.findOne({ where: { email } });
 
                 if (!user) {
-                    return done(null, false, {
-                        message: 'You need to register your account first!',
-                        redirectTo: '/signup'  // Optional: suggest where to register
+                    user = await User.create({
+                        email,
+                        agreedToPolicy: true,
                     });
                 }
-                const token = generateToken(user._id);
+
+                const token = generateToken({ id: user.id });
                 return done(null, { user, token });
-            } catch (error) {
-                return done(error);
+            } catch (err) {
+                return done(err);
             }
         }
     )
