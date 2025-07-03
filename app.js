@@ -11,7 +11,6 @@ require('./config/passport')
 // Initialize Express app
 const app = express();
 
-// Connect to MongoDB
 
 // Middlewares
 app.use(helmet());
