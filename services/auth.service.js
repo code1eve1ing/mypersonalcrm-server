@@ -33,7 +33,7 @@ exports.getUserDetails = async (req, res) => {
         console.log('get user details...')
         const user = await User.findByPk(req.user.id);
         console.log('req.header', req.headers)
-        const response = await axios.get(`http://localhost:5001/api/plans/${req.user.id}`, {
+        const response = await axios.get(`${PAYMENT_SERVICE_URL}/plans/${req.user.id}`, {
             headers: {
                 Authorization: req.headers.authorization // or just the token if that's your format
             }
