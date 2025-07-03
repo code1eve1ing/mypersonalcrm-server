@@ -1,4 +1,5 @@
 const jwt = require("../utils/jwt");
+const axios = require("axios");
 const { encryptField, decryptField } = require("../utils/crypto");
 const { User } = require("../models");
 
@@ -29,8 +30,28 @@ exports.login = async (req, res) => {
 
 exports.getUserDetails = async (req, res) => {
     try {
+        console.log('get user details...')
         const user = await User.findByPk(req.user.id);
-        res.json({ email: user.email, mobile: user.mobile ? decryptField(user.mobile) : 'not_set' });
+        console.log('req.header', req.headers)
+        const response = await axios.get(`http://localhost:5001/api/plans/${req.user.id}`, {
+            headers: {
+                Authorization: req.headers.authorization // or just the token if that's your format
+            }
+        });
+        console.log('res', response)
+        res.json({ email: user.email, mobile: user.mobile ? decryptField(user.mobile) : 'not_set', plan: response.data?.planId });
+    } catch (err) {
+        console.log('err', err)
+        res.status(500).json({ error: err.message });
+    }
+};
+
+exports.validateUser = async (req, res) => {
+    try {
+        const user = await User.findByPk(req.body.id);
+        const status = user ? 200 : 404
+        const success = user ? true : false
+        res.status(status).json({ success })
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
